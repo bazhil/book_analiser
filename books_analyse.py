@@ -15,7 +15,6 @@ class Books_analiser:
         self.books_info = []
         self.book_split = None
 
-
     def preprocess_text(self, text):
         """
         Служебная Функция, которая убирает из текста все лишние символы
@@ -31,7 +30,6 @@ class Books_analiser:
         text = text.replace(']', ' ')
         text = text.replace('"', ' ')
         text = text.replace('  ', ' ')
-
         return text
 
     def text_prepare(self, book):
@@ -334,8 +332,8 @@ class Books_analiser:
         book_data['КоличествоДефисов'] = self.sequense(book, '-')
         book_data['ПроцентДиалогов'] = self.brut_dialog_procents(book)
         book_data['АЗС3000'] = self.dinamical_change_asz(split_book, 3000)
-        books_info.append(book_data)
-        return books_info
+        self.books_info.append(book_data)
+        return self.books_info
 
     def books_analyze(self):
         """
@@ -349,7 +347,7 @@ class Books_analiser:
                 self.analyze(file)
         with open('books_information.json', 'w', encoding='utf-8') as f:
             json.dump(books_info, f, ensure_ascii=False, indent=2)
-        return books_info
+        return self.books_info
 
 if __name__ == '__main__':
     analiser = Books_analiser()
