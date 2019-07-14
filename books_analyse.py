@@ -346,7 +346,7 @@ class Books_analiser:
                 print('Анализируется: {}'.format(file))
                 self.analyze(file)
         with open('books_information.json', 'w', encoding='utf-8') as f:
-            json.dump(books_info, f, ensure_ascii=False, indent=2)
+            json.dump(self.books_info, f, ensure_ascii=False, indent=2)
         return self.books_info
 
 if __name__ == '__main__':
