@@ -91,7 +91,7 @@ class Books_analiser:
                 filtred_book.append(normal_word)
         book_counter = collections.Counter(filtred_book)
         most_common_words = book_counter.most_common(ind)
-        return most_common_words
+        return most_common_words, filtred_book
 
     def tags_counter(self, book_split):
         """
@@ -292,24 +292,25 @@ class Books_analiser:
         change_asz_data = dict(zip(x, y))
         return change_asz_data
 
-    def analyze(self, book):
+    def analyse(self, book):
         """
         Функция, которая анализирует книгу по ряду параметров и результат записывает в json
         :param book: файл книги
         :return: json-объект
         """
-        global books_info
+        # global books_info
         book_data = {}
         split_book = self.text_prepare(book)[0]
         head, tail = os.path.split(book)
+        most_common_words, filtred_words = self.most_common_words(split_book, 50)
         book_data['Автор'] = tail.split(' - ')[0]
         book_data['НазваниеКниги'] = tail.split(' - ')[1].replace('.docx', '')
         book_data['КоличествоСловГрубо'] = self.text_prepare(book)[1]
         book_data['КоличествоСловТочно'] = self.unique_words_counter(split_book)[0]
         book_data['КоличествоУникальныхСлов'] = self.unique_words_counter(split_book)[1]
         book_data['КоличествоЧастейРечи'] = self.tags_counter(split_book)
-        book_data['ПятьСамыхРаспространенныхСлов'] = self.most_common_words(split_book, 5)
-        book_data['ДесятьСамыхРаспространенныхСлов'] = self.most_common_words(split_book, 10)
+        book_data['ПятьдесятСамыхРаспространенныхСлов'] = most_common_words
+        book_data['СуществительныеПрилагательныеГлаголы'] = filtred_words
         book_data['ПроцентУникальныхСлов'] = (book_data['КоличествоУникальныхСлов'] / book_data['КоличествоСловТочно']) * 100
         book_data['КоличествоУникальныхСловНа3000'] = self.unique_words_in(split_book, 3000)
         book_data['ПроцентУникальныхСловНа3000'] = (book_data['КоличествоУникальныхСловНа3000'] / 3000) * 100
@@ -335,7 +336,7 @@ class Books_analiser:
         self.books_info.append(book_data)
         return self.books_info
 
-    def books_analyze(self):
+    def books_analyse(self):
         """
         Функция, которая анализирует все книги, которые лежат в одной папке с ней, и результат сохраняет в JSON-файл.
         :return: books_info
@@ -344,11 +345,11 @@ class Books_analiser:
         for file in dir:
             if file.endswith('.docx'):
                 print('Анализируется: {}'.format(file))
-                self.analyze(file)
+                self.analyse(file)
         with open('books_information.json', 'w', encoding='utf-8') as f:
             json.dump(self.books_info, f, ensure_ascii=False, indent=2)
         return self.books_info
 
 if __name__ == '__main__':
-    analiser = Books_analiser()
-    analiser.books_analyze()
+    analyser = Books_analiser()
+    analyser.books_analyse()
