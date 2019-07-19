@@ -74,6 +74,7 @@ class Books_analiser:
         :return: словарь
         """
         filtred_book = []
+        nouns = []
         m = pymorphy2.MorphAnalyzer()
         # Отбираем все существительные, глаголы и прилагательные для дальнейшего анализа самых распространенных слов
         for word in book_split:
@@ -81,6 +82,7 @@ class Books_analiser:
             normal_word = lemmas.normal_form
             if 'NOUN' in lemmas.tag:
                 filtred_book.append(normal_word)
+                nouns.append(normal_word)
             if 'ADJF' in lemmas.tag:
                 filtred_book.append(normal_word)
             if 'ADJS' in lemmas.tag:
@@ -89,9 +91,10 @@ class Books_analiser:
                 filtred_book.append(normal_word)
             if 'INFN' in lemmas.tag:
                 filtred_book.append(normal_word)
-        book_counter = collections.Counter(filtred_book)
-        most_common_words = book_counter.most_common(ind)
-        return most_common_words, filtred_book
+        book_counter = collections.Counter(nouns)
+        tags = book_counter.most_common(ind)
+        filtred_book = list(set(filtred_book))
+        return tags, filtred_book, nouns
 
     def tags_counter(self, book_split):
         """
@@ -298,18 +301,19 @@ class Books_analiser:
         :param book: файл книги
         :return: json-объект
         """
-        # global books_info
         book_data = {}
         split_book = self.text_prepare(book)[0]
         head, tail = os.path.split(book)
-        most_common_words, filtred_words = self.most_common_words(split_book, 50)
+        tags, filtred_words, nouns = self.most_common_words(split_book, 100)
+        tags = [i[0] for i in tags]
         book_data['Автор'] = tail.split(' - ')[0]
         book_data['НазваниеКниги'] = tail.split(' - ')[1].replace('.docx', '')
         book_data['КоличествоСловГрубо'] = self.text_prepare(book)[1]
         book_data['КоличествоСловТочно'] = self.unique_words_counter(split_book)[0]
         book_data['КоличествоУникальныхСлов'] = self.unique_words_counter(split_book)[1]
         book_data['КоличествоЧастейРечи'] = self.tags_counter(split_book)
-        book_data['ПятьдесятСамыхРаспространенныхСлов'] = most_common_words
+        book_data['Теги'] = tags
+        book_data['Существительные'] = nouns
         book_data['СуществительныеПрилагательныеГлаголы'] = filtred_words
         book_data['ПроцентУникальныхСлов'] = (book_data['КоличествоУникальныхСлов'] / book_data['КоличествоСловТочно']) * 100
         book_data['КоличествоУникальныхСловНа3000'] = self.unique_words_in(split_book, 3000)
