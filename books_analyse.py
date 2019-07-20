@@ -44,6 +44,16 @@ class Books_analiser:
         book_split = book_str.split(' ')
         return book_split, len(book_split)
 
+    def docx2txt(self, book):
+        """
+        Функиця, которая преобразует книги формата .docx в формат .txt
+        :param book: книга в фломате .docx
+        :return:
+        """
+        book_str = docx2txt.process(book)
+        with open(book.split('.')[0] + '.txt', 'w', encoding='utf-8') as target_book:
+            target_book.write(book_str)
+
     def unique_words_counter(self, book_split):
         """
         Функция, которая подсчтывает количество уникальных слов
@@ -94,7 +104,7 @@ class Books_analiser:
         book_counter = collections.Counter(nouns)
         tags = book_counter.most_common(ind)
         filtred_book = list(set(filtred_book))
-        return tags, filtred_book, nouns
+        return tags, filtred_book
 
     def tags_counter(self, book_split):
         """
@@ -271,6 +281,7 @@ class Books_analiser:
         dialogs_procents = math.floor((dialogs / cents) * 100)
         return dialogs_procents
 
+
     def split(self, a, n):
         """
         Вспомогательная функция, которая помогает разделить список на подсписки заданной длины
@@ -304,7 +315,7 @@ class Books_analiser:
         book_data = {}
         split_book = self.text_prepare(book)[0]
         head, tail = os.path.split(book)
-        tags, filtred_words, nouns = self.most_common_words(split_book, 100)
+        tags, _ = self.most_common_words(split_book, 100)
         tags = [i[0] for i in tags]
         book_data['Автор'] = tail.split(' - ')[0]
         book_data['НазваниеКниги'] = tail.split(' - ')[1].replace('.docx', '')
@@ -312,9 +323,7 @@ class Books_analiser:
         book_data['КоличествоСловТочно'] = self.unique_words_counter(split_book)[0]
         book_data['КоличествоУникальныхСлов'] = self.unique_words_counter(split_book)[1]
         book_data['КоличествоЧастейРечи'] = self.tags_counter(split_book)
-        book_data['Теги'] = tags
-        book_data['Существительные'] = nouns
-        book_data['СуществительныеПрилагательныеГлаголы'] = filtred_words
+        book_data['СтоЧащеВстречаемыхСлов'] = tags
         book_data['ПроцентУникальныхСлов'] = (book_data['КоличествоУникальныхСлов'] / book_data['КоличествоСловТочно']) * 100
         book_data['КоличествоУникальныхСловНа3000'] = self.unique_words_in(split_book, 3000)
         book_data['ПроцентУникальныхСловНа3000'] = (book_data['КоличествоУникальныхСловНа3000'] / 3000) * 100
@@ -335,7 +344,6 @@ class Books_analiser:
         book_data['КоличествоДлинныхТире'] = self.sequense(book, '—')
         book_data['КоличествоТире'] = self.sequense(book, '–')
         book_data['КоличествоДефисов'] = self.sequense(book, '-')
-        book_data['ПроцентДиалогов'] = self.brut_dialog_procents(book)
         book_data['АЗС3000'] = self.dinamical_change_asz(split_book, 3000)
         self.books_info.append(book_data)
         return self.books_info
