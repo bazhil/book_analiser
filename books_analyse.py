@@ -6,6 +6,7 @@ import math
 import json
 import pymorphy2
 
+
 class Books_analiser:
     """
     Класс, который содержит функционал для анализа книг.
@@ -14,6 +15,7 @@ class Books_analiser:
     def __init__(self):
         self.books_info = []
         self.book_split = None
+
 
     def preprocess_text(self, text):
         """
@@ -32,6 +34,7 @@ class Books_analiser:
         text = text.replace('  ', ' ')
         return text
 
+
     def text_prepare(self, book):
         """
         Подготавливает книгу к анализу
@@ -44,6 +47,7 @@ class Books_analiser:
         book_split = book_str.split(' ')
         return book_split, len(book_split)
 
+
     def docx2txt(self, book):
         """
         Функиця, которая преобразует книги формата .docx в формат .txt
@@ -53,6 +57,7 @@ class Books_analiser:
         book_str = docx2txt.process(book)
         with open(book.split('.')[0] + '.txt', 'w', encoding='utf-8') as target_book:
             target_book.write(book_str)
+
 
     def unique_words_counter(self, book_split):
         """
@@ -75,6 +80,7 @@ class Books_analiser:
         # Определяем количество слов
         quantity_of_unique_words = len(unique_words)
         return words_count, quantity_of_unique_words
+
 
     def most_common_words(self, book_split, ind=int):
         """
@@ -105,6 +111,7 @@ class Books_analiser:
         tags = book_counter.most_common(ind)
         filtred_book = list(set(filtred_book))
         return tags, filtred_book
+
 
     def tags_counter(self, book_split):
         """
@@ -238,6 +245,7 @@ class Books_analiser:
         quantity_of_unique_words = len(unique_words)
         return quantity_of_unique_words
 
+
     def count_centencions(self, book):
         """
         Функция, которая выводит количество предложений в тексте и среднюю длину предложения
@@ -253,6 +261,7 @@ class Books_analiser:
         average_centencion_length = math.ceil(centencion_sum_length/centencions_count)
         return centencions_count, average_centencion_length
 
+
     def sequense(self, book, character=str):
         """
         Возвращает частоту вхождения определенного символа в текст произведения
@@ -266,6 +275,7 @@ class Books_analiser:
             if char == character:
                 count += 1
         return count
+
 
     def brut_dialog_procents(self, book):
         """
@@ -292,6 +302,7 @@ class Books_analiser:
         k, m = divmod(len(a), n)
         return (a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
 
+
     def dinamical_change_asz(self, book_split, ind=3000):
         """
         Функция, которая определяет динамику изменения количества уникальных слов на 3000 слов от начала и до конца книги
@@ -305,6 +316,7 @@ class Books_analiser:
         y = [self.unique_words_counter(i)[0] for i in fragments]
         change_asz_data = dict(zip(x, y))
         return change_asz_data
+
 
     def analyse(self, book):
         """
@@ -336,7 +348,9 @@ class Books_analiser:
                                               book_data['КоличествоЧастейРечи']['ПрилагательныеКраткие']) / book_data['КоличествоСловТочно']) * 100
         book_data['ПроцентГлаголов'] = ((book_data['КоличествоЧастейРечи']['ГлаголыЛичнаяФорма'] +
                                               book_data['КоличествоЧастейРечи']['ГлаголыИнфинитив']) / book_data['КоличествоСловТочно']) * 100
-        book_data['ПроцентОстальныхЧастейРечи'] = 100 - (book_data['ПроцентСуществительных'] + book_data['ПроцентПрилагательных'] + book_data['ПроцентГлаголов'])
+        book_data['ПроцентПричастий'] = ((book_data['КоличествоЧастейРечи']['ПричастияПолные'] + book_data['КоличествоЧастейРечи']['ПричастияКраткие']) / book_data['КоличествоСловТочно']) * 100
+        book_data['ПроцентДеепричастий'] = (book_data['КоличествоЧастейРечи']['Деепричастия'] / book_data['КоличествоСловТочно']) * 100
+        book_data['ПроцентОстальныхЧастейРечи'] = 100 - (book_data['ПроцентСуществительных'] + book_data['ПроцентПрилагательных'] + book_data['ПроцентГлаголов'] + book_data['ПроцентПричастий'] + book_data['ПроцентДеепричастий'])
         book_data['КоличествоТочек'] = self.sequense(book, '.')
         book_data['КоличествоЗапятых'] = self.sequense(book, ',')
         book_data['КоличествоВосклицательныхЗнаков'] = self.sequense(book, '!')
@@ -347,6 +361,7 @@ class Books_analiser:
         book_data['АЗС3000'] = self.dinamical_change_asz(split_book, 3000)
         self.books_info.append(book_data)
         return self.books_info
+
 
     def books_analyse(self):
         """
